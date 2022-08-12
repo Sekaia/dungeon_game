@@ -1,3 +1,0 @@
-class Exit:
-    def __init__(self):
-        pass
