@@ -1,7 +1,9 @@
 from tkinter import Button, Label
 import random
-
+import ctypes
 import settings
+import sys
+#  self.cell_btn_object.unbind('<Button-1>')     <- This makes it so nothing happens when you click a cell
 
 
 class Cell:
@@ -19,6 +21,7 @@ class Cell:
         self.is_chest = is_chest
         self.is_monster = is_monster
         self.is_opened = False
+        self.is_clickable = False  # TODO!!
         self.surrounded_cells_moster_is_opened = False
         self.surrounded_cells_treasure_is_opened = False
         self.cell_btn_object = None
@@ -34,7 +37,7 @@ class Cell:
             height=4,
             text=" "
         )
-        btn.bind("<Button-1>", self.left_click_actions)
+        btn.bind("<Button-1>", self.left_click_actions) # !!!! ONLY MAKE THESE CLICKABLE IF THEY ARE SURROUNDING THE CELL WHERE WE AREEEEEEEEE
         btn.bind("<Button-3>", self.right_click_actions)
         self.cell_btn_object = btn
 
@@ -102,8 +105,27 @@ class Cell:
                 treasure += 1
             elif not cell.is_opened and cell.is_exit:
                 exit += 1
-
-        if monsters > 0:
+        if monsters > 0 and treasure > 0 and exit > 0:
+            Cell.hint_label.configure(
+                fg="orange",
+                text="I sense\nmonsters..\nand\ntreasure..\nand.. the\nexit..?"
+            )
+        elif monsters > 0 and treasure > 0:
+            Cell.hint_label.configure(
+                fg="orange",
+                text="I sense\nmonsters..\nand\ntreasure.."
+            )
+        elif monsters > 0 and exit > 0:
+            Cell.hint_label.configure(
+                fg="orange",
+                text="I sense\nmonsters..\nnand..\nthe exit..?"
+            )
+        elif treasure > 0 and exit > 0:
+            Cell.hint_label.configure(
+                fg="green",
+                text="I sense\ntreasure..\nand..\nthe exit..?"
+            )
+        elif monsters > 0:
             if monsters == 1:
                 Cell.hint_label.configure(
                     fg="red",
@@ -114,20 +136,25 @@ class Cell:
                     fg="red",
                     text="There\nare\nmonsters\nnearby.."
                 )
-        if treasure > 0:
+        elif treasure > 0:
             Cell.hint_label.configure(
                 fg="gold",
                 text="There\nis\ntreasure\nnearby.."
             )
-        if exit > 0:
+        elif exit > 0:
             Cell.hint_label.configure(
                 fg="green",
                 text="The\nexit is\naround\nhere.."
             )
+        else:
+            Cell.hint_label.configure(
+                fg="white",
+                text="I don't\nsense\nanything\naround me.."
+            )
 
 
         if self.is_monster:
-            self.show_monster()
+            self.game_over()
         elif self.is_exit:
             self.show_exit()
         elif self.is_chest:
@@ -162,6 +189,7 @@ class Cell:
             self.get_cell_by_axis(self.x, self.y + 1)  # 1, 2
         ]
         cells = [cell for cell in cells if cell is not None]
+        # make these clickable!
         return cells
 
     @property
@@ -209,20 +237,28 @@ class Cell:
 
     def show_monster(self):
         if not self.is_opened:
-            Cell.monster_count -= 1
             self.cell_btn_object.configure(bg="red")
+            Cell.monster_count -= 1
             if Cell.monster_count_label:
                 Cell.monster_count_label.configure(
                     text=f"Monsters left: {Cell.monster_count}"
                 )
         self.is_opened = True
 
+    def game_over(self):
+        ctypes.windll.user32.MessageBoxW(0, "A monster killed you", "Game Over", 0)
+        sys.exit()
+
     def show_exit(self):
         self.cell_btn_object.configure(bg="green")
+        Cell.score += 500
+        self.score_count_label.configure(text=f"Score: {Cell.score}")
+        ctypes.windll.user32.MessageBoxW(0, f"You escaped the dungeon!\nTotal Score: {Cell.score}", "Congratulations!", 0)
+        sys.exit()
 
     def show_chest(self):
         if not self.is_opened:
-            self.cell_btn_object.configure(bg="yellow")
+            self.cell_btn_object.configure(bg="gray", text="O", fg="yellow")
             Cell.treasure_count -= 1
             Cell.score += 100
             if Cell.treasure_count_label:
@@ -236,7 +272,22 @@ class Cell:
         self.is_opened = True
 
     def right_click_actions(self, event):
-        print("I am right clicked!")
+        if self.is_monster:
+            print("OUCH! YOU KILLED ME")
+            self.show_monster()
+            self.is_monster = False
+            self.cell_btn_object.configure(
+                bg="gray",
+                fg="red",
+                text="X"
+            )
+            Cell.score += 25
+            if Cell.score_count_label:
+                Cell.score_count_label.configure(
+                    text=f"Score: {Cell.score}"
+                )
+        else:
+            print("YOu missed")
 
     @staticmethod
     def randomize_monsters():  # change later
