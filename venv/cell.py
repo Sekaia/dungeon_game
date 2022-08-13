@@ -19,6 +19,8 @@ class Cell:
         self.is_chest = is_chest
         self.is_monster = is_monster
         self.is_opened = False
+        self.surrounded_cells_moster_is_opened = False
+        self.surrounded_cells_treasure_is_opened = False
         self.cell_btn_object = None
         self.x = x
         self.y = y
@@ -53,7 +55,7 @@ class Cell:
     def create_hint_label(location):
         lvl = Label(
             location,
-            text="There\nare\nmonsters\nnearby..",
+            text="",
             bg="black",
             fg="orange",
             width=14,
@@ -89,15 +91,41 @@ class Cell:
         Cell.treasure_count_label = lbl
 
     def left_click_actions(self, event):
-        if self.surrounded_cells_monster > 0:
-            if self.surrounded_cells_monster == 1:
-                print("There is a monster nearby..")
+        Cell.hint_label.configure(text=" ")
+        monsters = 0
+        treasure = 0
+        exit = 0
+        for cell in self.surrounded_cells:
+            if not cell.is_opened and cell.is_monster:
+                monsters += 1
+            elif not cell.is_opened and cell.is_chest:
+                treasure += 1
+            elif not cell.is_opened and cell.is_exit:
+                exit += 1
+
+        if monsters > 0:
+            if monsters == 1:
+                Cell.hint_label.configure(
+                    fg="red",
+                    text = "There\nis a\nmonster\nnearby.."
+                )
             else:
-                print("There are monsters nearby..")
-        if self.surrounded_cells_chest > 0:
-            print("There is treasure nearby..")
-        if self.surrounded_cells_exit > 0:
-            print("The exit is around here..")
+                Cell.hint_label.configure(
+                    fg="red",
+                    text="There\nare\nmonsters\nnearby.."
+                )
+        if treasure > 0:
+            Cell.hint_label.configure(
+                fg="gold",
+                text="There\nis\ntreasure\nnearby.."
+            )
+        if exit > 0:
+            Cell.hint_label.configure(
+                fg="green",
+                text="The\nexit is\naround\nhere.."
+            )
+
+
         if self.is_monster:
             self.show_monster()
         elif self.is_exit:
@@ -177,6 +205,7 @@ class Cell:
 
     def show_cell(self):
         self.cell_btn_object.configure(bg="gray")
+        self.is_opened = True
 
     def show_monster(self):
         if not self.is_opened:
@@ -199,6 +228,7 @@ class Cell:
                 Cell.treasure_count_label.configure(
                     text=f"Treasure left: {Cell.treasure_count}"
                 )
+        Cell.score += 100
         self.is_opened = True
 
     def right_click_actions(self, event):
