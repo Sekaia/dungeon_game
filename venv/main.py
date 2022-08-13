@@ -38,22 +38,29 @@ center_frame = Frame(
 )
 center_frame.place(x=utils.width_prct(20),y=utils.height_prct(17))
 
-for x in range(settings.GRID_SIZE + 1):
-    for y in range(settings.GRID_SIZE + 1):
-        c = Cell()
+for x in range(13):  # change later
+    for y in range(settings.GRID_SIZE + 2):
+        c = Cell(x, y)
         c.create_btn_object(center_frame)
         c.cell_btn_object.grid(
             column=x, row=y
         )
 
-c1 = Cell()
-c1.create_btn_object(center_frame)
-c1.cell_btn_object.grid(column=0, row=0)
+Cell.create_score_label(top_frame)
+Cell.score_count_label.place(x=utils.width_prct(42), y=0)
 
-c2 = Cell()
-c2.create_btn_object(center_frame)
-c2.cell_btn_object.grid(column=0, row=1)
+Cell.create_monster_count_label(top_frame)
+Cell.monster_count_label.place(x=utils.width_prct(0), y=0)
 
+Cell.create_treasure_count_label(top_frame)
+Cell.treasure_count_label.place(x=utils.width_prct(74), y=0)
+
+Cell.create_hint_label(left_frame)
+Cell.hint_label.place(x=0,y=0)
+
+Cell.randomize_monsters()
+Cell.randomize_exit()
+Cell.randomize_chests()
 
 # Run the main window
 root.mainloop()
