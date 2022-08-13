@@ -32,7 +32,7 @@ class Cell:
             location,
             width=8,
             height=4,
-            text=f"{self.x}, {self.y}"
+            text=" "
         )
         btn.bind("<Button-1>", self.left_click_actions)
         btn.bind("<Button-3>", self.right_click_actions)
@@ -224,11 +224,15 @@ class Cell:
         if not self.is_opened:
             self.cell_btn_object.configure(bg="yellow")
             Cell.treasure_count -= 1
+            Cell.score += 100
             if Cell.treasure_count_label:
                 Cell.treasure_count_label.configure(
                     text=f"Treasure left: {Cell.treasure_count}"
                 )
-        Cell.score += 100
+            if Cell.score_count_label:
+                Cell.score_count_label.configure(
+                    text=f"Score: {Cell.score}"
+                )
         self.is_opened = True
 
     def right_click_actions(self, event):
