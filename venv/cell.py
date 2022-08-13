@@ -33,6 +33,7 @@ class Cell:
     def create_btn_object(self, location):
         btn = Button(
             location,
+            bg="black",
             width=8,
             height=4,
             text=" "
