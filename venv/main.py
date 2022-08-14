@@ -61,6 +61,7 @@ Cell.hint_label.place(x=0,y=0)
 Cell.randomize_monsters()
 Cell.randomize_exit()
 Cell.randomize_chests()
+Cell.randomize_starting_cell()
 
 # Run the main window
 root.mainloop()

@@ -20,6 +20,7 @@ class Cell:
         self.is_exit = is_exit
         self.is_chest = is_chest
         self.is_monster = is_monster
+        self.is_starting_cell = False
         self.is_opened = False
         self.is_clickable = False  # TODO!!
         self.surrounded_cells_moster_is_opened = False
@@ -257,6 +258,10 @@ class Cell:
         ctypes.windll.user32.MessageBoxW(0, f"You escaped the dungeon!\nTotal Score: {Cell.score}", "Congratulations!", 0)
         sys.exit()
 
+    def show_starting_cell(self):
+        self.cell_btn_object.configure(bg="blue")
+
+
     def show_chest(self):
         if not self.is_opened:
             self.cell_btn_object.configure(bg="gray", text="O", fg="yellow")
@@ -299,6 +304,25 @@ class Cell:
         # print(f"monsters = {picked_cells}")
 
     @staticmethod
+    def randomize_starting_cell():  # change later
+        picked_cell = random.choice(Cell.all)
+        while picked_cell in Cell.used:
+            picked_cell = random.choice(Cell.all)
+        picked_cell.is_starting_cell = True
+        Cell.used.append(picked_cell)
+        print(f"starting cell = {picked_cell}")
+        picked_cell.show_starting_cell()
+        for cell_obj in picked_cell.reveal_area:
+            if cell_obj.is_monster:
+                cell_obj.show_monster()
+            elif cell_obj.is_exit:
+                cell_obj.show_exit()
+            elif cell_obj.is_chest:
+                cell_obj.show_chest()
+            else:
+                cell_obj.show_cell()
+
+    @staticmethod
     def randomize_exit():
         picked_cell = random.choice(Cell.all)
         while picked_cell in Cell.used:
@@ -306,6 +330,9 @@ class Cell:
         picked_cell.is_exit = True
         Cell.used.append(picked_cell)
         # print(f"exit = {picked_cell}")
+        for cell_obj in picked_cell.reveal_area:
+            if cell_obj.is_starting_cell:
+                cell_obj.show_monster()
 
     @staticmethod
     def randomize_chests():  # change later
